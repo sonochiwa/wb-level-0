@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  postgres:
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    ports:
+      - "5432:5432"
+    networks:
+      - mynetwork
+
+  nats-streaming:
+    command: ["-cid", "fddfd9c8-c093-4523-9225-567738366642"]
+    build:
+      context: ./docker/nats-streaming
+      dockerfile: Dockerfile
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

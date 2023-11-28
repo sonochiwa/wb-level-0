@@ -1,0 +1,7 @@
+FROM postgres:16.1-alpine3.18
+
+ENV POSTGRES_DB wb_db
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD postgres
+
+EXPOSE 5432
