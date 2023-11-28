@@ -1,0 +1,5 @@
+package order
+
+const (
+	createOrder = ``
+)

@@ -8,10 +8,10 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - mynetwork
+      - network
 
   nats-streaming:
-    command: ["-cid", "fddfd9c8-c093-4523-9225-567738366642"]
+    command: [ "-cid", "${CLUSTER_ID}" ]
     build:
       context: ./docker/nats-streaming
       dockerfile: Dockerfile
@@ -19,8 +19,8 @@ services:
       - "4222:4222"
       - "8222:8222"
     networks:
-      - mynetwork
+      - network
 
 networks:
-  mynetwork:
+  network:
     driver: bridge
