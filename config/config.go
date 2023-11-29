@@ -25,7 +25,8 @@ type Postgres struct {
 	Password string
 	Host     string
 	Port     string
-	Database string
+	DBName   string
+	SSLMode  string
 }
 
 type Stan struct {
@@ -55,7 +56,8 @@ func GetConfig() Config {
 			Password: getEnv("POSTGRES_PASSWORD", "root"),
 			Host:     getEnv("POSTGRES_HOST", "localhost"),
 			Port:     getEnv("POSTGRES_PORT", "5432"),
-			Database: getEnv("POSTGRES_DATABASE", "wb_db"),
+			DBName:   getEnv("POSTGRES_DBNAME", "wb_db"),
+			SSLMode:  getEnv("POSTGRES_SSL_MODE", "disable"),
 		},
 		Stan: Stan{
 			ClusterID:   getEnv("STAN_CLUSTER_ID", "my-cluster"),

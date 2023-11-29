@@ -1,16 +1,11 @@
 package main
 
 import (
-	"context"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
-
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/sonochiwa/wb-level-0/internal/repository"
+	"log"
 
 	appConfig "github.com/sonochiwa/wb-level-0/config"
 	stanClient "github.com/sonochiwa/wb-level-0/internal/clients/stan"
@@ -23,6 +18,20 @@ var cfg = appConfig.GetConfig()
 func main() {
 	log.Println("Starting API server...")
 
+	db, err := repository.NewPostgresDB(appConfig.Postgres{
+		Username: cfg.Postgres.Username,
+		Password: cfg.Postgres.Password,
+		Host:     cfg.Postgres.Host,
+		Port:     cfg.Postgres.Port,
+		DBName:   cfg.Postgres.DBName,
+		SSLMode:  cfg.Postgres.SSLMode,
+	})
+	if err != nil {
+		log.Fatalf("failed to initialize db: %s", err.Error())
+	}
+
+	repository.NewRepository(db)
+
 	go stanClient.New()
 
 	r := chi.NewRouter()
@@ -31,22 +40,5 @@ func main() {
 	r.Get("/", server.MainPage)
 	r.Mount("/", server.Routes())
 
-	// gracefully shutdown
-	srv := &http.Server{Addr: ":" + cfg.ServerConfig.Port, Handler: r}
-	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			log.Println(err)
-		}
-	}()
-
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, os.Interrupt)
-
-	<-stop
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Println(err)
-	}
+	server.Run(cfg.ServerConfig.Port, r)
 }
