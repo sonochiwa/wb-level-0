@@ -7,7 +7,7 @@ CREATE TABLE orders
     internal_signature VARCHAR(255),
     customer_id        VARCHAR(255),
     delivery_service   VARCHAR(255),
-    shard_key           VARCHAR(255),
+    shard_key          VARCHAR(255),
     sm_id              NUMERIC,
     date_created       TIMESTAMP,
     oof_shard          VARCHAR(255)

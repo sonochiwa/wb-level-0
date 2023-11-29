@@ -23,6 +23,8 @@ func getOrderByID(w http.ResponseWriter, r *http.Request) {
 
 func createOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+
+	w.Write([]byte("ok"))
 }
 
 func Routes() http.Handler {

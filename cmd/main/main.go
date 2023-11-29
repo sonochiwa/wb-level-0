@@ -1,71 +1,29 @@
 package main
 
 import (
-	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
-	"github.com/nats-io/stan.go"
-	"github.com/nats-io/stan.go/pb"
-	mw "github.com/sonochiwa/wb-level-0/internal/middleware"
-	"github.com/sonochiwa/wb-level-0/internal/server"
-	"github.com/spf13/viper"
+	"context"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+
+	appConfig "github.com/sonochiwa/wb-level-0/config"
+	stanClient "github.com/sonochiwa/wb-level-0/internal/clients/stan"
+	mw "github.com/sonochiwa/wb-level-0/internal/middleware"
+	"github.com/sonochiwa/wb-level-0/internal/server"
 )
 
-func messageHandler(msg *stan.Msg) {
-	// Обработка полученных данных, например, запись в БД и обновление кэша
-	fmt.Printf("Received a message: %s\n", string(msg.Data))
-}
+var cfg = appConfig.GetConfig()
 
 func main() {
 	log.Println("Starting API server...")
 
-	viper.SetConfigFile("config.yml")
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatalf("Error reading config file, %s", err)
-	}
-
-	go func() {
-		sc, err := stan.Connect(viper.GetString("stan.ClusterID"), viper.GetString("stan.ClientID"),
-			stan.NatsURL(stan.DefaultNatsURL))
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer sc.Close()
-
-		// Публикация сообщения
-		message := []byte("Hello, NATS Streaming!")
-		if err := sc.Publish(viper.GetString("stan.ChannelName"), message); err != nil {
-			log.Fatalf("Error publishing message: %v", err)
-		}
-
-		// Подписка на канал
-		subscription, err := sc.Subscribe(viper.GetString("stan.ChannelName"), messageHandler, stan.StartAt(pb.StartPosition_First),
-			stan.DeliverAllAvailable(), stan.DurableName(viper.GetString("stan.ClientID")))
-		if err != nil {
-			log.Fatalf("Error subscribing to channel: %v", err)
-		}
-		fmt.Printf("Subscribed to channel %s\n", viper.GetString("stan.ChannelName"))
-
-		// Ждем сигнала завершения (Ctrl+C)
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-		<-c
-		// Отписываемся от канала при завершении
-		err = subscription.Unsubscribe()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println("Unsubscribed from channel")
-		//Ожидание сообщений
-		select {}
-	}()
+	go stanClient.New()
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
@@ -73,5 +31,22 @@ func main() {
 	r.Get("/", server.MainPage)
 	r.Mount("/", server.Routes())
 
-	http.ListenAndServe(":"+viper.GetString("server.port"), r)
+	// gracefully shutdown
+	srv := &http.Server{Addr: ":" + cfg.ServerConfig.Port, Handler: r}
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Println(err)
+	}
 }
