@@ -11,7 +11,7 @@ services:
       - network
 
   nats-streaming:
-    command: [ "-cid", "${CLUSTER_ID}" ]
+    command: [ "-cid", "my-cluster" ]
     build:
       context: ./docker/nats-streaming
       dockerfile: Dockerfile
