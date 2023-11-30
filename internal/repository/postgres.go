@@ -14,8 +14,8 @@ const (
 
 func NewPostgresDB(cfg configs.Postgres) (*sqlx.DB, error) {
 	db, err := sqlx.Open("postgres",
-		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=localhost port=5433",
-			cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode))
+		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s port=%s",
+			cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode, cfg.Host, cfg.Port))
 
 	if err != nil {
 		return nil, err
