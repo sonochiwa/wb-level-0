@@ -10,7 +10,7 @@ import (
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
 
-	appConfig "github.com/sonochiwa/wb-level-0/config"
+	appConfig "github.com/sonochiwa/wb-level-0/configs"
 )
 
 var cfg = appConfig.GetConfig()

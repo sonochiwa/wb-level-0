@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	appConfig "github.com/sonochiwa/wb-level-0/config"
+	appConfig "github.com/sonochiwa/wb-level-0/configs"
+)
+
+const (
+	ordersTable     = "orders"
+	orderItemsTable = "order_items"
 )
 
 func NewPostgresDB(cfg appConfig.Postgres) (*sqlx.DB, error) {

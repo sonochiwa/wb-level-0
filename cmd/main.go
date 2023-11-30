@@ -7,7 +7,7 @@ import (
 	"github.com/sonochiwa/wb-level-0/internal/repository"
 	"log"
 
-	appConfig "github.com/sonochiwa/wb-level-0/config"
+	appConfig "github.com/sonochiwa/wb-level-0/configs"
 	stanClient "github.com/sonochiwa/wb-level-0/internal/clients/stan"
 	mw "github.com/sonochiwa/wb-level-0/internal/middleware"
 	"github.com/sonochiwa/wb-level-0/internal/server"

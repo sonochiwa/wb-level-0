@@ -1,7 +1,7 @@
 .SILENT: run
 
 run:
-	go build -o build/main cmd/main/main.go
+	go build -o build/main cmd/main.go
 	./build/main
 
 migrate:
