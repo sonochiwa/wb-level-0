@@ -6,9 +6,9 @@ import (
 )
 
 type Order interface {
-	GetAll() ([]models.Order, error)
-	GetById(orderID string) (models.Order, error)
-	Create(order models.Order) (string, error)
+	GetAllOrders() ([]models.Order, error)
+	GetOrderById(orderID string) (models.Order, error)
+	CreateOrder(order models.Order) (string, error)
 }
 
 type Service struct {

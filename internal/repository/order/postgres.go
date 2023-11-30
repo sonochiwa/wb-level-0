@@ -13,14 +13,14 @@ func NewOrderPostgres(db *sqlx.DB) *Postgres {
 	return &Postgres{db: db}
 }
 
-func (p *Postgres) GetAll() ([]models.Order, error) {
+func (p *Postgres) GetAllOrders() ([]models.Order, error) {
 	return []models.Order{}, nil
 }
 
-func (p *Postgres) GetById(orderID string) (models.Order, error) {
+func (p *Postgres) GetOrderById(orderID string) (models.Order, error) {
 	return models.Order{}, nil
 }
 
-func (p *Postgres) Create(order models.Order) (string, error) {
+func (p *Postgres) CreateOrder(order models.Order) (string, error) {
 	return "", nil
 }
