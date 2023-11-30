@@ -49,7 +49,7 @@ func GetConfig() Config {
 	return Config{
 		ServerConfig: ServerConfig{
 			Host: getEnv("HOST", "0.0.0.0"),
-			Port: getEnv("PORT", "9000"),
+			Port: getEnv("PORT", "8080"),
 		},
 		Postgres: Postgres{
 			Username: getEnv("POSTGRES_USERNAME", "root"),

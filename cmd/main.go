@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
-	"github.com/sonochiwa/wb-level-0/internal/handlers"
+	"github.com/sonochiwa/wb-level-0/internal/handler"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
+	"github.com/sonochiwa/wb-level-0/internal/service"
 	"log"
 	"net/http"
 	"os"
@@ -15,7 +13,6 @@ import (
 
 	appConfig "github.com/sonochiwa/wb-level-0/configs"
 	stanClient "github.com/sonochiwa/wb-level-0/internal/clients/stan"
-	mw "github.com/sonochiwa/wb-level-0/internal/middleware"
 )
 
 var cfg = appConfig.GetConfig()
@@ -35,19 +32,15 @@ func main() {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	repository.NewRepository(db)
+	repos := repository.NewRepository(db)
+	services := service.NewService(repos)
+	handlers := handler.NewHandler(services)
 
 	go stanClient.New()
 
-	r := chi.NewRouter()
-	r.Use(middleware.Logger)
-	r.Use(cors.New(mw.GetCors()).Handler)
-	r.Get("/", handlers.MainPage)
-	r.Mount("/", handlers.Routes())
-
 	srv := &http.Server{
 		Addr:    ":" + cfg.Postgres.Port,
-		Handler: r,
+		Handler: handlers.InitRoutes(),
 	}
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {

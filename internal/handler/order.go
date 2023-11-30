@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"fmt"
@@ -6,11 +6,7 @@ import (
 	"net/http"
 )
 
-func MainPage(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "web/templates/index.html")
-}
-
-func getOrderIdentifiers(w http.ResponseWriter, r *http.Request) {
+func getAllOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte("hello world"))
 }
@@ -25,14 +21,4 @@ func createOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	w.Write([]byte("ok"))
-}
-
-func Routes() http.Handler {
-	rg := chi.NewRouter()
-	rg.Group(func(r chi.Router) {
-		r.Get("/orders/identifiers", getOrderIdentifiers)
-		r.Get("/orders/{orderID}", getOrderByID)
-		r.Post("/orders", createOrder)
-	})
-	return rg
 }
