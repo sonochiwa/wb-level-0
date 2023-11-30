@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-	appConfig "github.com/sonochiwa/wb-level-0/configs"
+	"github.com/sonochiwa/wb-level-0/configs"
 )
 
 const (
@@ -12,9 +12,9 @@ const (
 	orderItemsTable = "order_items"
 )
 
-func NewPostgresDB(cfg appConfig.Postgres) (*sqlx.DB, error) {
-	db, err := sqlx.Connect("postgres",
-		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s",
+func NewPostgresDB(cfg configs.Postgres) (*sqlx.DB, error) {
+	db, err := sqlx.Open("postgres",
+		fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=localhost port=5433",
 			cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode))
 
 	if err != nil {

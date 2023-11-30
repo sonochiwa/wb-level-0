@@ -2,25 +2,25 @@ package main
 
 import (
 	"context"
-	"github.com/sonochiwa/wb-level-0/internal/handler"
-	"github.com/sonochiwa/wb-level-0/internal/repository"
-	"github.com/sonochiwa/wb-level-0/internal/service"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	appConfig "github.com/sonochiwa/wb-level-0/configs"
-	stanClient "github.com/sonochiwa/wb-level-0/internal/clients/stan"
+	"github.com/sonochiwa/wb-level-0/configs"
+	sc "github.com/sonochiwa/wb-level-0/internal/clients/stan"
+	"github.com/sonochiwa/wb-level-0/internal/handler"
+	"github.com/sonochiwa/wb-level-0/internal/repository"
+	"github.com/sonochiwa/wb-level-0/internal/service"
 )
 
-var cfg = appConfig.GetConfig()
+var cfg = configs.GetConfig()
 
 func main() {
 	log.Println("Starting API server...")
 
-	db, err := repository.NewPostgresDB(appConfig.Postgres{
+	db, err := repository.NewPostgresDB(configs.Postgres{
 		Username: cfg.Postgres.Username,
 		Password: cfg.Postgres.Password,
 		Host:     cfg.Postgres.Host,
@@ -36,7 +36,7 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	go stanClient.New()
+	go sc.New()
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.Postgres.Port,
