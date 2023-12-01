@@ -22,16 +22,16 @@ func (h *Handler) InitRoutes() http.Handler {
 	r.Use(middleware.Logger)
 	r.Use(cors.New(mw.GetCors()).Handler)
 	r.Get("/", mainPage)
-	r.Mount("/orders", orderRoutes())
+	r.Mount("/", h.orderRoutes())
 
 	return r
 }
 
-func orderRoutes() http.Handler {
+func (h *Handler) orderRoutes() http.Handler {
 	rg := chi.NewRouter()
-	rg.Get("/", getAllOrders)
-	rg.Get("/{orderID}", getOrderByID)
-	rg.Post("/", createOrder)
+	rg.Get("/orders", h.getAllOrders)
+	rg.Get("/orders/{orderID}", h.getOrderByID)
+	rg.Post("/orders", h.createOrder)
 
 	return rg
 }

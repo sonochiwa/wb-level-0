@@ -1,5 +1,8 @@
 .SILENT: run
 
+docker:
+	docker compose up -d
+
 run:
 	go build -o build/main cmd/main.go
 	./build/main

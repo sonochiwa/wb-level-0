@@ -2,6 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"github.com/sonochiwa/wb-level-0/internal/handler"
+	"github.com/sonochiwa/wb-level-0/internal/service"
 	"log"
 	"net/http"
 	"os"
@@ -9,10 +12,7 @@ import (
 	"time"
 
 	"github.com/sonochiwa/wb-level-0/configs"
-	sc "github.com/sonochiwa/wb-level-0/internal/clients/stan"
-	"github.com/sonochiwa/wb-level-0/internal/handler"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
-	"github.com/sonochiwa/wb-level-0/internal/service"
 )
 
 var cfg = configs.GetConfig()
@@ -36,12 +36,15 @@ func main() {
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	go sc.New()
+	//go sc.New()
 
 	srv := &http.Server{
-		Addr:    ":" + cfg.Postgres.Port,
+		Addr:    ":" + cfg.ServerConfig.Port,
 		Handler: handlers.InitRoutes(),
 	}
+
+	fmt.Printf("Server running on http://%s:%s\n", cfg.ServerConfig.Host, cfg.ServerConfig.Port)
+
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
 			log.Println(err)
@@ -50,7 +53,6 @@ func main() {
 
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
-
 	<-stop
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
