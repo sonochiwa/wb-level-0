@@ -1,7 +1,6 @@
 package order
 
 import (
-	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/sonochiwa/wb-level-0/internal/models"
 )
@@ -17,18 +16,50 @@ func NewOrderPostgres(db *sqlx.DB) *Postgres {
 func (p *Postgres) GetAllOrders() ([]models.Order, error) {
 	var orders []models.Order
 
-	query := "SELECT * FROM orders"
+	query := selectOrders
 	err := p.db.Select(&orders, query)
 
-	fmt.Println(orders)
+	for _, order := range orders {
+		if order.Delivery == nil {
+			order.Delivery = &models.Delivery{}
+		}
+
+		if order.Payment == nil {
+			order.Payment = &models.Payment{}
+		}
+
+		if order.Items == nil {
+			order.Items = &[]models.OrderItems{}
+		}
+	}
 
 	return orders, err
 }
 
 func (p *Postgres) GetOrderById(orderID string) (models.Order, error) {
-	return models.Order{}, nil
+	var order models.Order
+
+	query := selectOrderByID
+	err := p.db.Get(&order, query, orderID)
+
+	if order.Delivery == nil {
+		order.Delivery = &models.Delivery{}
+	}
+
+	if order.Payment == nil {
+		order.Payment = &models.Payment{}
+	}
+
+	if order.Items == nil {
+		order.Items = &[]models.OrderItems{}
+	}
+
+	return order, err
 }
 
 func (p *Postgres) CreateOrder(order models.Order) (string, error) {
-	return "", nil
+	query := createOrder
+	err := p.db.QueryRow(query, order.TrackNumber).Scan(&order.OrderUID)
+
+	return order.OrderUID, err
 }

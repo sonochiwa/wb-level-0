@@ -1,6 +1,8 @@
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
 CREATE TABLE orders
 (
-    order_uid          VARCHAR(36) PRIMARY KEY,
+    order_uid          UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     track_number       VARCHAR(255) UNIQUE,
     entry              VARCHAR(255),
     delivery           JSONB,
@@ -17,8 +19,8 @@ CREATE TABLE orders
 
 CREATE TABLE order_items
 (
-    chrt_id      INT PRIMARY KEY,
-    order_uid    VARCHAR(255) REFERENCES orders (order_uid),
+    chrt_id      SERIAL PRIMARY KEY,
+    order_uid    UUID REFERENCES orders (order_uid) NOT NULL,
     track_number VARCHAR(255),
     price        NUMERIC,
     rid          VARCHAR(255),

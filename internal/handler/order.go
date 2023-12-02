@@ -8,10 +8,6 @@ import (
 	"net/http"
 )
 
-type getAllOrdersResponse struct {
-	Data []models.Order `json:"data"`
-}
-
 func (h *Handler) getAllOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
@@ -27,11 +23,26 @@ func (h *Handler) getAllOrders(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getOrderByID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	id := chi.URLParam(r, "orderID")
-	fmt.Println(id)
+
+	order, err := h.services.Order.GetOrderById(id)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	json.NewEncoder(w).Encode(order)
 }
 
 func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	var t models.Order
+	json.NewDecoder(r.Body).Decode(&t)
 
-	w.Write([]byte("ok"))
+	order, err := h.services.Order.CreateOrder(t)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	json.NewEncoder(w).Encode(order)
 }
