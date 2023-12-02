@@ -3,87 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <style>
-        .card {
-            margin-bottom: 1rem;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Order Management</title>
 </head>
 <body>
 
 <div class="container mt-5">
-    <h1>Orders Interface</h1>
-    <div id="ordersList" class="mt-4"></div>
+    <h1>Order List</h1>
+    <ul class="list-group" id="orderList">
+        <!-- Order items will be dynamically added here -->
+    </ul>
 
-    <!-- Order Details Modal -->
-    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel"
-         aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <h2 class="mt-4">Get Order by ID</h2>
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Enter Order ID" id="orderIdInput">
+        <button class="btn btn-primary" onclick="getOrderById()">Get Order</button>
+    </div>
+
+    <h2 class="mt-4">Create Order</h2>
+    <button class="btn btn-success" onclick="createOrder()">Create Order</button>
+
+    <div class="modal" tabindex="-1" id="orderModal">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="orderDetailsModalLabel">Order Details</h5>
+                    <h5 class="modal-title">Order Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body"></div>
+                <div class="modal-body">
+        <pre id="orderModalBody">
+          <!-- Order details will be dynamically added here -->
+        </pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="deleteOrderButton">Delete Order</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Button to send POST request without payload -->
-    <button class="btn btn-success mt-3" onclick="sendPostRequest()">Create Order</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    async function fetchOrders() {
+    // Function to get orders from the server and display them
+    async function getOrders() {
         const response = await fetch('http://0.0.0.0:8080/orders');
-        return await response.json();
-    }
+        const orders = await response.json();
 
-    async function fetchOrderDetails(orderUid) {
-        const response = await fetch(`http://0.0.0.0:8080/orders/${orderUid}`);
-        return await response.json();
-    }
-
-    async function renderOrdersList() {
-        const ordersListContainer = document.getElementById('ordersList');
-        ordersListContainer.innerHTML = '';
-
-        const orders = await fetchOrders();
+        const orderList = document.getElementById('orderList');
+        orderList.innerHTML = ''; // Clear previous items
 
         orders.forEach(order => {
-            const orderCard = document.createElement('div');
-            orderCard.className = 'card';
-            orderCard.innerHTML = `
-                <div class="card-body">
-                    <h5 class="card-title">Заказ № ${order.order_uid}</h5>
-                    <button class="btn btn-primary" onclick="showOrderDetails('${order.order_uid}')">View Details</button>
-                </div>
-            `;
-            ordersListContainer.appendChild(orderCard);
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+            listItem.textContent = `Order ID: ${order.order_uid}`;
+            orderList.appendChild(listItem);
         });
     }
 
-    async function showOrderDetails(orderUid) {
-        const orderDetailsModal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
-        const modalBody = document.querySelector('#orderDetailsModal .modal-body');
-        const orderDetails = await fetchOrderDetails(orderUid);
+    // Function to get a specific order by ID
+    async function getOrderById() {
+        const orderIdInput = document.getElementById('orderIdInput');
+        const orderId = orderIdInput.value;
 
-        modalBody.innerHTML = `<pre>${JSON.stringify(orderDetails, null, 2)}</pre>`;
-        orderDetailsModal.show();
-    }
-
-    async function sendPostRequest() {
         try {
-            const response = await fetch('http://0.0.0.0:8080/orders', {method: 'POST'});
-            renderOrdersList();
+            const response = await fetch(`http://0.0.0.0:8080/orders/${orderId}`);
+            const order = await response.json();
+
+            // Update the modal body with order details
+            const orderModalBody = document.getElementById('orderModalBody');
+            orderModalBody.textContent = JSON.stringify(order, null, 2);
+
+            // Show the modal
+            const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+            orderModal.show();
         } catch (error) {
-            console.error('Error creating order:', error);
+            console.error('Error fetching order:', error);
+            alert('Failed to fetch order.');
         }
     }
 
-    renderOrdersList();
+    // Function to create a new order (send empty POST request)
+    async function createOrder() {
+        const response = await fetch('http://0.0.0.0:8080/orders', {method: 'POST'});
+
+        if (response.status === 200) {
+            getOrders();
+        } else {
+            alert('Failed to create order.');
+        }
+    }
+
+    // Initial call to get orders when the page loads
+    getOrders();
 </script>
 
 </body>

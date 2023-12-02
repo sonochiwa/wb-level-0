@@ -23,7 +23,7 @@ func (m *Payment) Scan(value interface{}) error {
 }
 
 type Order struct {
-	OrderUID          string        `json:"order_uid" db:"order_uid"`
+	OrderUID          *string       `json:"order_uid" db:"order_uid"`
 	TrackNumber       *string       `json:"track_number" db:"track_number"`
 	Entry             *string       `json:"entry" db:"entry"`
 	Delivery          *Delivery     `json:"delivery" db:"delivery"`

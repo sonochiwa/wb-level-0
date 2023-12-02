@@ -19,6 +19,7 @@ func (p *Postgres) GetAllOrders() ([]models.Order, error) {
 	query := selectOrders
 	err := p.db.Select(&orders, query)
 
+	//TODO: fix it
 	for _, order := range orders {
 		if order.Delivery == nil {
 			order.Delivery = &models.Delivery{}
@@ -58,8 +59,8 @@ func (p *Postgres) GetOrderById(orderID string) (models.Order, error) {
 }
 
 func (p *Postgres) CreateOrder(order models.Order) (string, error) {
-	query := createOrder
+	query := insertOrder
 	err := p.db.QueryRow(query, order.TrackNumber).Scan(&order.OrderUID)
 
-	return order.OrderUID, err
+	return *order.OrderUID, err
 }

@@ -14,7 +14,7 @@ const (
 					WHERE order_uid = $1;
 					`
 
-	createOrder = `
+	insertOrder = `
 					INSERT INTO orders (order_uid, track_number)
 					VALUES (DEFAULT, $1) 
 					RETURNING order_uid;
