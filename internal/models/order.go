@@ -22,6 +22,10 @@ func (m *Payment) Scan(value interface{}) error {
 	return json.Unmarshal(b, &m)
 }
 
+type OrderID struct {
+	OrderUID *string `json:"order_uid" db:"order_uid"`
+}
+
 type Order struct {
 	OrderUID          *string       `json:"order_uid" db:"order_uid"`
 	TrackNumber       *string       `json:"track_number" db:"track_number"`

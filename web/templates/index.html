@@ -4,39 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <title>Order Management</title>
+    <title>Orders</title>
 </head>
 <body>
 
 <div class="container mt-5">
-    <h1>Order List</h1>
-    <ul class="list-group" id="orderList">
-        <!-- Order items will be dynamically added here -->
-    </ul>
-
-    <h2 class="mt-4">Get Order by ID</h2>
     <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Enter Order ID" id="orderIdInput">
-        <button class="btn btn-primary" onclick="getOrderById()">Get Order</button>
+        <button class="btn btn-primary me-1" onclick="getOrderById()">Get Order</button>
+        <button class="btn btn-success me-1" onclick="createOrder()">Create Order</button>
+        <button class="btn btn-danger" onclick="deleteAllOrders()">Delete all</button>
     </div>
 
-    <h2 class="mt-4">Create Order</h2>
-    <button class="btn btn-success" onclick="createOrder()">Create Order</button>
+    <ul class="list-group" id="orderList"></ul>
 
     <div class="modal" tabindex="-1" id="orderModal">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Order Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body">
-        <pre id="orderModalBody">
-          <!-- Order details will be dynamically added here -->
-        </pre>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="deleteOrderButton">Delete Order</button>
+                    <pre id="orderModalBody" style="margin-bottom: 0"></pre>
                 </div>
             </div>
         </div>
@@ -46,13 +32,14 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Function to get orders from the server and display them
+    const host = 'http://0.0.0.0:8080'
+
     async function getOrders() {
-        const response = await fetch('http://0.0.0.0:8080/orders');
+        const response = await fetch(`${host}/orders`);
         const orders = await response.json();
 
         const orderList = document.getElementById('orderList');
-        orderList.innerHTML = ''; // Clear previous items
+        orderList.innerHTML = '';
 
         orders.forEach(order => {
             const listItem = document.createElement('li');
@@ -62,31 +49,26 @@
         });
     }
 
-    // Function to get a specific order by ID
     async function getOrderById() {
         const orderIdInput = document.getElementById('orderIdInput');
         const orderId = orderIdInput.value;
 
         try {
-            const response = await fetch(`http://0.0.0.0:8080/orders/${orderId}`);
+            const response = await fetch(`${host}/orders/${orderId}`);
             const order = await response.json();
 
-            // Update the modal body with order details
             const orderModalBody = document.getElementById('orderModalBody');
             orderModalBody.textContent = JSON.stringify(order, null, 2);
 
-            // Show the modal
             const orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
             orderModal.show();
         } catch (error) {
-            console.error('Error fetching order:', error);
             alert('Failed to fetch order.');
         }
     }
 
-    // Function to create a new order (send empty POST request)
     async function createOrder() {
-        const response = await fetch('http://0.0.0.0:8080/orders', {method: 'POST'});
+        const response = await fetch(`${host}/orders`, {method: 'POST'});
 
         if (response.status === 200) {
             getOrders();
@@ -95,7 +77,11 @@
         }
     }
 
-    // Initial call to get orders when the page loads
+    async function deleteAllOrders() {
+        await fetch(`${host}/orders`, {method: 'DELETE'})
+        getOrders();
+    }
+
     getOrders();
 </script>
 

@@ -13,26 +13,11 @@ func NewOrderPostgres(db *sqlx.DB) *Postgres {
 	return &Postgres{db: db}
 }
 
-func (p *Postgres) GetAllOrders() ([]models.Order, error) {
-	var orders []models.Order
+func (p *Postgres) GetAllOrders() ([]models.OrderID, error) {
+	var orders []models.OrderID
 
 	query := selectOrders
 	err := p.db.Select(&orders, query)
-
-	//TODO: fix it
-	for _, order := range orders {
-		if order.Delivery == nil {
-			order.Delivery = &models.Delivery{}
-		}
-
-		if order.Payment == nil {
-			order.Payment = &models.Payment{}
-		}
-
-		if order.Items == nil {
-			order.Items = &[]models.OrderItems{}
-		}
-	}
 
 	return orders, err
 }
@@ -63,4 +48,9 @@ func (p *Postgres) CreateOrder(order models.Order) (string, error) {
 	err := p.db.QueryRow(query, order.TrackNumber).Scan(&order.OrderUID)
 
 	return *order.OrderUID, err
+}
+
+func (p *Postgres) DeleteAllOrders() {
+	query := deleteAllOrders
+	p.db.Exec(query)
 }

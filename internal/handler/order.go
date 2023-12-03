@@ -46,3 +46,11 @@ func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(order)
 }
+
+func (h *Handler) deleteAllOrders(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	h.services.Order.DeleteAllOrders()
+
+	json.NewEncoder(w).Encode("ok")
+}

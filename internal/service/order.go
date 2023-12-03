@@ -13,7 +13,7 @@ func NewOrderService(repo repository.Order) *OrderService {
 	return &OrderService{repo: repo}
 }
 
-func (s *OrderService) GetAllOrders() ([]models.Order, error) {
+func (s *OrderService) GetAllOrders() ([]models.OrderID, error) {
 	return s.repo.GetAllOrders()
 }
 
@@ -23,4 +23,8 @@ func (s *OrderService) GetOrderById(orderID string) (models.Order, error) {
 
 func (s *OrderService) CreateOrder(order models.Order) (string, error) {
 	return s.repo.CreateOrder(order)
+}
+
+func (s *OrderService) DeleteAllOrders() {
+	s.repo.DeleteAllOrders()
 }

@@ -32,6 +32,7 @@ func (h *Handler) orderRoutes() http.Handler {
 	rg.Get("/orders", h.getAllOrders)
 	rg.Get("/orders/{orderID}", h.getOrderByID)
 	rg.Post("/orders", h.createOrder)
+	rg.Delete("/orders", h.deleteAllOrders)
 
 	return rg
 }
