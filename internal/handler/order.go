@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/sonochiwa/wb-level-0/internal/models"
 	"net/http"
 )
 
@@ -35,10 +34,8 @@ func (h *Handler) getOrderByID(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	var t models.Order
-	json.NewDecoder(r.Body).Decode(&t)
 
-	order, err := h.services.Order.CreateOrder(t)
+	order, err := h.services.Order.CreateOrder()
 	if err != nil {
 		fmt.Println(err)
 		return

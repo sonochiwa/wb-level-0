@@ -38,7 +38,7 @@ type Order struct {
 	CustomerID        *string       `json:"customer_id" db:"customer_id"`
 	DeliveryService   *string       `json:"delivery_service" db:"delivery_service"`
 	ShardKey          *string       `json:"shard_key" db:"shard_key"`
-	SmID              *uint64       `json:"sm_id" db:"sm_id"`
+	SmID              *int          `json:"sm_id" db:"sm_id"`
 	DateCreated       *time.Time    `json:"date_created" db:"date_created"`
 	OofShard          *string       `json:"oof_shard" db:"oof_shard"`
 }
@@ -58,10 +58,10 @@ type Payment struct {
 	RequestID    *string `json:"request_id" db:"request_id"`
 	Currency     *string `json:"currency" db:"currency"`
 	Provider     *string `json:"provider" db:"provider"`
-	Amount       *uint64 `json:"amount" db:"amount"`
-	PaymentDt    *uint64 `json:"payment_dt" db:"payment_dt"`
+	Amount       *int    `json:"amount" db:"amount"`
+	PaymentDt    *int    `json:"payment_dt" db:"payment_dt"`
 	Bank         *string `json:"bank" db:"bank"`
-	DeliveryCost *uint64 `json:"delivery_cost" db:"delivery_cost"`
-	GoodsTotal   *uint64 `json:"goods_total" db:"goods_total"`
-	CustomFee    *uint64 `json:"custom_fee" db:"custom_fee"`
+	DeliveryCost *int    `json:"delivery_cost" db:"delivery_cost"`
+	GoodsTotal   *int    `json:"goods_total" db:"goods_total"`
+	CustomFee    *int    `json:"custom_fee" db:"custom_fee"`
 }

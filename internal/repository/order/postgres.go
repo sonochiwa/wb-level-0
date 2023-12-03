@@ -43,9 +43,13 @@ func (p *Postgres) GetOrderById(orderID string) (models.Order, error) {
 	return order, err
 }
 
+// CreateOrder TODO: fix nil, nil to order.Delivery, order.Payment and add Items field
 func (p *Postgres) CreateOrder(order models.Order) (string, error) {
 	query := insertOrder
-	err := p.db.QueryRow(query, order.TrackNumber).Scan(&order.OrderUID)
+	err := p.db.QueryRow(query,
+		order.TrackNumber, order.Entry, nil, nil, order.Locale, order.InternalSignature,
+		order.CustomerID, order.DeliveryService, order.ShardKey, order.SmID, order.DateCreated, order.OofShard,
+	).Scan(&order.OrderUID)
 
 	return *order.OrderUID, err
 }

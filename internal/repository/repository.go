@@ -9,7 +9,7 @@ import (
 type Order interface {
 	GetAllOrders() ([]models.OrderID, error)
 	GetOrderById(orderID string) (models.Order, error)
-	CreateOrder(order models.Order) (string, error)
+	CreateOrder(items models.Order) (string, error)
 	DeleteAllOrders()
 }
 
