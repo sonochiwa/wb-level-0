@@ -16,7 +16,7 @@ Update DB state
 make migrate
 ```
 
-Run application
+Run the application and launch  [localhost:8080](http://localhost:8080/)
 
 ```bash
 make run
