@@ -1,3 +1,27 @@
+## Prerequisites
+
+Installed Docker Compose
+
+## First installation
+
+Check that ports `8080, 5432, 4222, 8222` are free and run docker compose
+
+```bash
+make docker
+```
+
+Update DB state
+
+```bash
+make migrate
+```
+
+Run application
+
+```bash
+make run
+```
+
 ## Apache Benchmark
 
 - Get Order By ID - 2551 RPS   
