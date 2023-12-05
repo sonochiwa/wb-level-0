@@ -40,3 +40,15 @@ ab -m POST -T application/json -c 10 -n 5000 http://0.0.0.0:8080/orders
 ```  
 
 ![RPS POST](examples/rps-post-orders.png)
+
+## Schema
+
+![SCHEMA](examples/schema.png)
+
+## UI
+
+![MAIN](examples/ui.png)
+
+## Modal
+
+![MODAL](examples/modal.png)
