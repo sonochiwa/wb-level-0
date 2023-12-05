@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/sonochiwa/wb-level-0/internal/handler"
-	"github.com/sonochiwa/wb-level-0/internal/service"
 	"log"
 	"net/http"
 	"os"
@@ -12,7 +10,9 @@ import (
 	"time"
 
 	"github.com/sonochiwa/wb-level-0/configs"
+	"github.com/sonochiwa/wb-level-0/internal/handler"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
+	"github.com/sonochiwa/wb-level-0/internal/service"
 )
 
 var cfg = configs.GetConfig()

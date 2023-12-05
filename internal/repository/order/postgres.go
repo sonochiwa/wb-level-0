@@ -2,6 +2,8 @@ package order
 
 import (
 	"encoding/json"
+	"log"
+
 	"github.com/jmoiron/sqlx"
 	"github.com/sonochiwa/wb-level-0/internal/models"
 )
@@ -29,33 +31,29 @@ func (p *Postgres) GetOrderById(orderID string) (models.Order, error) {
 	query := selectOrderByID
 	err := p.db.Get(&order, query, orderID)
 
-	//if order.Delivery == nil {
-	//	order.Delivery = &models.Delivery{}
-	//}
-	//
-	//if order.Payment == nil {
-	//	order.Payment = &models.Payment{}
-	//}
-	//
-	//if order.Items == nil {
-	//	order.Items = &[]models.OrderItems{}
-	//}
-
 	return order, err
 }
 
-// CreateOrder TODO: fix nil, nil to order.Delivery, order.Payment and add Items field
 func (p *Postgres) CreateOrder(order models.Order) (string, error) {
 	query := insertOrder
 
-	delivery := &order.Delivery
-	d, _ := json.Marshal(delivery)
+	delivery, err := json.Marshal(&order.Delivery)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	payment := &order.Payment
-	pmnt, _ := json.Marshal(payment)
+	payment, err := json.Marshal(&order.Payment)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	err := p.db.QueryRow(query,
-		order.TrackNumber, order.Entry, d, pmnt, order.Locale, order.InternalSignature,
+	items, err := json.Marshal(&order.Items)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = p.db.QueryRow(query,
+		order.TrackNumber, order.Entry, delivery, payment, items, order.Locale, order.InternalSignature,
 		order.CustomerID, order.DeliveryService, order.ShardKey, order.SmID, order.DateCreated, order.OofShard,
 	).Scan(&order.OrderUID)
 

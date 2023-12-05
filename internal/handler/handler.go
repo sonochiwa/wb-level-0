@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	mw "github.com/sonochiwa/wb-level-0/internal/middleware"
 	"github.com/sonochiwa/wb-level-0/internal/service"
-	"net/http"
 )
 
 type Handler struct {

@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+type ItemsScanner []Item
+
 func (m *Delivery) Scan(value interface{}) error {
 	b, ok := value.([]byte)
 	if !ok {
@@ -22,6 +24,22 @@ func (m *Payment) Scan(value interface{}) error {
 	return json.Unmarshal(b, &m)
 }
 
+func (m *Item) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, &m)
+}
+
+func (items *ItemsScanner) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, items)
+}
+
 type OrderID struct {
 	OrderUID string `json:"order_uid" db:"order_uid"`
 }
@@ -32,7 +50,7 @@ type Order struct {
 	Entry             string       `json:"entry" db:"entry"`
 	Delivery          Delivery     `json:"delivery" db:"delivery"`
 	Payment           Payment      `json:"payment" db:"payment"`
-	Items             []OrderItems `json:"items" db:"items"`
+	Items             ItemsScanner `json:"items" db:"items"`
 	Locale            string       `json:"locale" db:"locale"`
 	InternalSignature string       `json:"internal_signature" db:"internal_signature"`
 	CustomerID        string       `json:"customer_id" db:"customer_id"`
@@ -64,4 +82,18 @@ type Payment struct {
 	DeliveryCost int    `json:"delivery_cost" db:"delivery_cost"`
 	GoodsTotal   int    `json:"goods_total" db:"goods_total"`
 	CustomFee    int    `json:"custom_fee" db:"custom_fee"`
+}
+
+type Item struct {
+	ChrtID      int    `json:"chrt_id"`
+	TrackNumber string `json:"track_number"`
+	Price       int    `json:"price"`
+	Rid         string `json:"rid"`
+	Name        string `json:"name"`
+	Sale        int    `json:"sale"`
+	Size        int    `json:"size"`
+	TotalPrice  int    `json:"total_price"`
+	NmID        string `json:"nm_id"`
+	Brand       string `json:"brand"`
+	Status      int    `json:"status"`
 }

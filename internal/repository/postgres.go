@@ -3,15 +3,10 @@ package repository
 import (
 	"fmt"
 
+	"github.com/sonochiwa/wb-level-0/configs"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
-
-	"github.com/sonochiwa/wb-level-0/configs"
-)
-
-const (
-	ordersTable     = "orders"
-	orderItemsTable = "order_items"
 )
 
 func NewPostgresDB(cfg configs.Postgres) (*sqlx.DB, error) {
