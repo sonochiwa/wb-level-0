@@ -14,27 +14,39 @@ import (
 )
 
 var cfg = config.GetConfig()
+var sc stan.Conn
 
 func messageHandler(msg *stan.Msg) {
-	// Обработка полученных данных, например, запись в БД и обновление кэша
+	data := string(msg.Data)
+	err := saveToDB(data)
+	if err != nil {
+		log.Printf("Error processing data: %v", err)
+	}
+
 	fmt.Printf("Received a message: %s\n", string(msg.Data))
 }
 
+func saveToDB(data string) error {
+	return nil
+}
+
+func PublishMessage(publishChan <-chan string) error {
+	message := <-publishChan
+	if err := sc.Publish(cfg.Stan.ChannelName, []byte(message)); err != nil {
+		log.Printf("Error publishing message: %v", err)
+		return err
+	}
+	log.Printf("Published message to channel %s: %s\n", message)
+	return nil
+}
+
 func New() {
-	sc, err := stan.Connect(cfg.Stan.ClusterID, cfg.Stan.ClientID,
-		stan.NatsURL(stan.DefaultNatsURL))
+	sc, err := stan.Connect(cfg.Stan.ClusterID, cfg.Stan.ClientID, stan.NatsURL(stan.DefaultNatsURL))
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer sc.Close()
 
-	// Публикация сообщения
-	message := []byte("Hello, NATS Streaming!")
-	if err := sc.Publish(cfg.Stan.ChannelName, message); err != nil {
-		log.Fatalf("Error publishing message: %v", err)
-	}
-
-	// Подписка на канал
 	subscription, err := sc.Subscribe(cfg.Stan.ChannelName, messageHandler, stan.StartAt(pb.StartPosition_First),
 		stan.DeliverAllAvailable(), stan.DurableName(cfg.Stan.ClientID))
 	if err != nil {
@@ -42,17 +54,15 @@ func New() {
 	}
 	fmt.Printf("Subscribed to channel %s\n", cfg.Stan.ChannelName)
 
-	// Ждем сигнала завершения (Ctrl+C)
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	<-c
 
-	// Отписываемся от канала при завершении
 	err = subscription.Unsubscribe()
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Unsubscribed from channel")
-	//Ожидание сообщений
+
 	select {}
 }

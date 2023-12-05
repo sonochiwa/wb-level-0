@@ -29,8 +29,8 @@ func (s *OrderService) CreateOrder() (string, error) {
 
 	items := make([]models.Item, gofakeit.Number(1, 3))
 
-	for k, _ := range items {
-		items[k] = models.Item{
+	for item := range items {
+		items[item] = models.Item{
 			ChrtID:      gofakeit.Number(0, 65535),
 			TrackNumber: trackNumber,
 			Price:       gofakeit.Number(0, 65535),
@@ -44,7 +44,6 @@ func (s *OrderService) CreateOrder() (string, error) {
 			Status:      gofakeit.Number(200, 202),
 		}
 	}
-
 	order := &models.Order{
 		TrackNumber: trackNumber,
 		Entry:       gofakeit.Word(),

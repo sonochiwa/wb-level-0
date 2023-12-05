@@ -7,9 +7,11 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"time"
 
 	"github.com/sonochiwa/wb-level-0/configs"
+	sc "github.com/sonochiwa/wb-level-0/internal/clients/stan"
 	"github.com/sonochiwa/wb-level-0/internal/handler"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
 	"github.com/sonochiwa/wb-level-0/internal/service"
@@ -19,6 +21,9 @@ var cfg = configs.GetConfig()
 
 func main() {
 	log.Println("Starting API server...")
+
+	publishChan := make(chan string)
+	var wg sync.WaitGroup
 
 	db, err := repository.NewPostgresDB(configs.Postgres{
 		Username: cfg.Postgres.Username,
@@ -32,11 +37,25 @@ func main() {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		sc.New()
+	}()
+	wg.Wait()
+
+	publishChan <- "my message"
+	//sc.PublishMessage("Hello, NATS Streaming! from service")
+	err = sc.PublishMessage(publishChan)
+	if err != nil {
+		log.Println(err)
+	}
+	time.Sleep(time.Second)
+	close(publishChan)
+
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
-
-	//go sc.New()
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.ServerConfig.Port,
