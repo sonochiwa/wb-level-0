@@ -1,16 +1,20 @@
 package stan
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
+	"github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
-
 	config "github.com/sonochiwa/wb-level-0/configs"
+	mc "github.com/sonochiwa/wb-level-0/internal/cache"
+	"github.com/sonochiwa/wb-level-0/internal/models"
 )
 
 var cfg = config.GetConfig()
@@ -22,33 +26,69 @@ func messageHandler(msg *stan.Msg) {
 	if err != nil {
 		log.Printf("Error processing data: %v", err)
 	}
-
 	fmt.Printf("Received a message: %s\n", string(msg.Data))
+
+	//	отправляем данные в saveToMemCache
+	// в saveToMemCache сначала валидируем данные, затем если все окей,
+	// то записываем данные в кэш и возвращаем bool
+	// если true, то выполняем запрос в пг:
+	// пробуем записать данные в бд, если данные записались успешно,
+	// то возвращаем response, если нет, то дропаем запрос и возвращаем ошибку
+	// если false, то дропаем запрос
+
+}
+
+func saveToMemCache(data string) (interface{}, bool) {
+	cache := mc.New(5*time.Minute, 10*time.Minute)
+	cache.Set("myKey", "My value", 5*time.Minute)
+	i, found := cache.Get("myKey")
+	if !found {
+		return nil, found
+	}
+	return i, false
 }
 
 func saveToDB(data string) error {
-	return nil
-}
+	order := models.Order{}
 
-func PublishMessage(publishChan <-chan string) error {
-	message := <-publishChan
-	if err := sc.Publish(cfg.Stan.ChannelName, []byte(message)); err != nil {
-		log.Printf("Error publishing message: %v", err)
+	err := json.Unmarshal([]byte(data), &order)
+	if err != nil {
 		return err
 	}
-	log.Printf("Published message to channel %s: %s\n", message)
+
 	return nil
 }
 
-func New() {
-	sc, err := stan.Connect(cfg.Stan.ClusterID, cfg.Stan.ClientID, stan.NatsURL(stan.DefaultNatsURL))
+func PublishMessage(message []byte) error {
+	err := GetStanConnection().Publish(cfg.Stan.ChannelName, message)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	defer sc.Close()
 
+	return nil
+}
+
+func GetStanConnection() stan.Conn {
+	return sc
+}
+
+func New(clusterID, clientID, natsURL string) (stan.Conn, error) {
+	natsConn, err := nats.Connect(natsURL)
+	if err != nil {
+		return nil, err
+	}
+
+	sc, err = stan.Connect(clusterID, clientID, stan.NatsConn(natsConn))
+	if err != nil {
+		return nil, err
+	}
+
+	return sc, nil
+}
+
+func Subscribe(sc stan.Conn) {
 	subscription, err := sc.Subscribe(cfg.Stan.ChannelName, messageHandler, stan.StartAt(pb.StartPosition_First),
-		stan.DeliverAllAvailable(), stan.DurableName(cfg.Stan.ClientID))
+		stan.DeliverAllAvailable())
 	if err != nil {
 		log.Fatalf("Error subscribing to channel: %v", err)
 	}

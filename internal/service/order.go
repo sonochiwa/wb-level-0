@@ -1,9 +1,11 @@
 package service
 
 import (
+	"encoding/json"
 	"strconv"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/sonochiwa/wb-level-0/internal/clients/stan"
 	"github.com/sonochiwa/wb-level-0/internal/models"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
 )
@@ -78,6 +80,13 @@ func (s *OrderService) CreateOrder() (string, error) {
 		DateCreated:       gofakeit.Date(),
 		OofShard:          strconv.Itoa(gofakeit.Number(0, 65535)),
 	}
+
+	jsonOrder, err := json.Marshal(order)
+	if err != nil {
+		return "", err
+	}
+
+	stan.PublishMessage(jsonOrder)
 
 	return s.repo.CreateOrder(*order)
 }
