@@ -1,4 +1,4 @@
-package order
+package repository
 
 import (
 	"encoding/json"
@@ -60,7 +60,11 @@ func (p *Postgres) CreateOrder(order models.Order) (string, error) {
 	return order.OrderUID, err
 }
 
-func (p *Postgres) DeleteAllOrders() {
+func (p *Postgres) DeleteAllOrders() error {
 	query := deleteAllOrders
-	p.db.Exec(query)
+	_, err := p.db.Exec(query)
+	if err != nil {
+		return err
+	}
+	return nil
 }

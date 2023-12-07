@@ -17,7 +17,11 @@ func (h *Handler) getAllOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(orders)
+	err = json.NewEncoder(w).Encode(orders)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 func (h *Handler) getOrderByID(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +34,11 @@ func (h *Handler) getOrderByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(order)
+	err = json.NewEncoder(w).Encode(order)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
@@ -42,13 +50,25 @@ func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(order)
+	err = json.NewEncoder(w).Encode(map[string]string{"order_uid": order})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 func (h *Handler) deleteAllOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	h.services.Order.DeleteAllOrders()
+	err := h.services.Order.DeleteAllOrders()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	json.NewEncoder(w).Encode("ok")
+	err = json.NewEncoder(w).Encode(map[string]string{"message": "All rows from the orders table are deleted"})
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }

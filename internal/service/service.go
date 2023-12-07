@@ -9,7 +9,7 @@ type Order interface {
 	GetAllOrders() ([]models.OrderID, error)
 	GetOrderById(orderID string) (models.Order, error)
 	CreateOrder() (string, error)
-	DeleteAllOrders()
+	DeleteAllOrders() error
 }
 
 type Service struct {

@@ -3,14 +3,13 @@ package repository
 import (
 	"github.com/jmoiron/sqlx"
 	"github.com/sonochiwa/wb-level-0/internal/models"
-	"github.com/sonochiwa/wb-level-0/internal/repository/order"
 )
 
 type Order interface {
 	GetAllOrders() ([]models.OrderID, error)
 	GetOrderById(orderID string) (models.Order, error)
 	CreateOrder(items models.Order) (string, error)
-	DeleteAllOrders()
+	DeleteAllOrders() error
 }
 
 type Repository struct {
@@ -19,6 +18,6 @@ type Repository struct {
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Order: order.NewOrderPostgres(db),
+		Order: NewOrderPostgres(db),
 	}
 }

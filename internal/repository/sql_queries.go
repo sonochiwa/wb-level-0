@@ -1,4 +1,4 @@
-package order
+package repository
 
 const (
 	selectOrders = `SELECT order_uid FROM orders;`

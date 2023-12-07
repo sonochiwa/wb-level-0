@@ -13,7 +13,7 @@ import (
 	"github.com/nats-io/stan.go"
 	"github.com/nats-io/stan.go/pb"
 	config "github.com/sonochiwa/wb-level-0/configs"
-	mc "github.com/sonochiwa/wb-level-0/internal/cache"
+	mc "github.com/sonochiwa/wb-level-0/internal/memcache"
 	"github.com/sonochiwa/wb-level-0/internal/models"
 )
 
@@ -26,16 +26,11 @@ func messageHandler(msg *stan.Msg) {
 	if err != nil {
 		log.Printf("Error processing data: %v", err)
 	}
-	fmt.Printf("Received a message: %s\n", string(msg.Data))
 
-	//	отправляем данные в saveToMemCache
-	// в saveToMemCache сначала валидируем данные, затем если все окей,
-	// то записываем данные в кэш и возвращаем bool
-	// если true, то выполняем запрос в пг:
-	// пробуем записать данные в бд, если данные записались успешно,
-	// то возвращаем response, если нет, то дропаем запрос и возвращаем ошибку
-	// если false, то дропаем запрос
-
+	//err = saveToMemCache()
+	//if err != nil {
+	//	log.Printf(err)
+	//}
 }
 
 func saveToMemCache(data string) (interface{}, bool) {
@@ -55,6 +50,8 @@ func saveToDB(data string) error {
 	if err != nil {
 		return err
 	}
+
+	//repository.NewRepository().CreateOrder(order)
 
 	return nil
 }

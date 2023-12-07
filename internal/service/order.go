@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/brianvoe/gofakeit/v6"
+	gf "github.com/brianvoe/gofakeit/v6"
 	"github.com/sonochiwa/wb-level-0/internal/clients/stan"
 	"github.com/sonochiwa/wb-level-0/internal/models"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
@@ -26,71 +26,72 @@ func (s *OrderService) GetOrderById(orderID string) (models.Order, error) {
 	return s.repo.GetOrderById(orderID)
 }
 
-func (s *OrderService) CreateOrder() (string, error) {
-	trackNumber := gofakeit.Word()
-
-	items := make([]models.Item, gofakeit.Number(1, 3))
-
+func (s *OrderService) CreateOrder() error {
+	trackNumber := gf.Word()
+	items := make([]models.Item, gf.Number(1, 3))
 	for item := range items {
 		items[item] = models.Item{
-			ChrtID:      gofakeit.Number(0, 65535),
+			ChrtID:      gf.Number(0, 65535),
 			TrackNumber: trackNumber,
-			Price:       gofakeit.Number(0, 65535),
-			Rid:         gofakeit.UUID(),
-			Name:        gofakeit.Name(),
-			Sale:        gofakeit.Number(0, 90),
-			Size:        gofakeit.Number(32, 62),
-			TotalPrice:  gofakeit.Number(0, 65535),
-			NmID:        gofakeit.UUID(),
-			Brand:       gofakeit.Name(),
-			Status:      gofakeit.Number(200, 202),
+			Price:       gf.Number(0, 65535),
+			Rid:         gf.UUID(),
+			Name:        gf.Name(),
+			Sale:        gf.Number(0, 90),
+			Size:        gf.Number(32, 62),
+			TotalPrice:  gf.Number(0, 65535),
+			NmID:        gf.UUID(),
+			Brand:       gf.Name(),
+			Status:      gf.Number(200, 202),
 		}
 	}
 	order := &models.Order{
 		TrackNumber: trackNumber,
-		Entry:       gofakeit.Word(),
+		Entry:       gf.Word(),
 		Delivery: models.Delivery{
-			Name:    gofakeit.Name(),
-			Phone:   gofakeit.Phone(),
-			Zip:     gofakeit.Zip(),
-			City:    gofakeit.City(),
-			Address: gofakeit.Address().Address,
-			Region:  gofakeit.Country(),
-			Email:   gofakeit.Email(),
+			Name:    gf.Name(),
+			Phone:   gf.Phone(),
+			Zip:     gf.Zip(),
+			City:    gf.City(),
+			Address: gf.Address().Address,
+			Region:  gf.Country(),
+			Email:   gf.Email(),
 		},
 		Payment: models.Payment{
-			Transaction:  gofakeit.UUID(),
-			RequestID:    gofakeit.UUID(),
-			Currency:     gofakeit.Currency().Short,
-			Provider:     gofakeit.Username(),
-			Amount:       gofakeit.Number(0, 65535),
-			PaymentDt:    gofakeit.Number(0, 65535),
-			Bank:         gofakeit.Name(),
-			DeliveryCost: gofakeit.Number(0, 65535),
-			GoodsTotal:   gofakeit.Number(0, 65535),
-			CustomFee:    gofakeit.Number(0, 65535),
+			Transaction:  gf.UUID(),
+			RequestID:    gf.UUID(),
+			Currency:     gf.Currency().Short,
+			Provider:     gf.Username(),
+			Amount:       gf.Number(0, 65535),
+			PaymentDt:    gf.Number(0, 65535),
+			Bank:         gf.Name(),
+			DeliveryCost: gf.Number(0, 65535),
+			GoodsTotal:   gf.Number(0, 65535),
+			CustomFee:    gf.Number(0, 65535),
 		},
 		Items:             items,
-		Locale:            gofakeit.Language(),
-		InternalSignature: gofakeit.Word(),
-		CustomerID:        gofakeit.UUID(),
-		DeliveryService:   gofakeit.AppName(),
-		ShardKey:          strconv.Itoa(gofakeit.Number(0, 65535)),
-		SmID:              gofakeit.Number(0, 65535),
-		DateCreated:       gofakeit.Date(),
-		OofShard:          strconv.Itoa(gofakeit.Number(0, 65535)),
+		Locale:            gf.Language(),
+		InternalSignature: gf.Word(),
+		CustomerID:        gf.UUID(),
+		DeliveryService:   gf.AppName(),
+		ShardKey:          strconv.Itoa(gf.Number(0, 65535)),
+		SmID:              gf.Number(0, 65535),
+		DateCreated:       gf.Date(),
+		OofShard:          strconv.Itoa(gf.Number(0, 65535)),
 	}
 
-	jsonOrder, err := json.Marshal(order)
+	message, err := json.Marshal(order)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	stan.PublishMessage(jsonOrder)
+	err = stan.PublishMessage(message)
+	if err != nil {
+		return err
+	}
 
-	return s.repo.CreateOrder(*order)
+	return nil
 }
 
-func (s *OrderService) DeleteAllOrders() {
-	s.repo.DeleteAllOrders()
+func (s *OrderService) DeleteAllOrders() error {
+	return s.repo.DeleteAllOrders()
 }

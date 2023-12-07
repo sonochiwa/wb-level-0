@@ -36,7 +36,7 @@ func main() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
+	handlers := handler.New(services)
 
 	stanConn, err := sc.New(cfg.Stan.ClusterID, cfg.Stan.ClientID, stan.DefaultNatsURL)
 	if err != nil {
