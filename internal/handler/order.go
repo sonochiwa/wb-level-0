@@ -44,13 +44,13 @@ func (h *Handler) getOrderByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) createOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	order, err := h.services.Order.CreateOrder()
+	err := h.services.Order.CreateOrder()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = json.NewEncoder(w).Encode(map[string]string{"order_uid": order})
+	err = json.NewEncoder(w).Encode(map[string]string{"message": "data sent to broker"})
 	if err != nil {
 		fmt.Println(err)
 		return
