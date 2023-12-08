@@ -71,7 +71,7 @@
         const response = await fetch(`${host}/orders`, {method: 'POST'});
 
         if (response.status === 200) {
-            getOrders();
+            setTimeout(getOrders, 50)
         } else {
             alert('Failed to create order.');
         }

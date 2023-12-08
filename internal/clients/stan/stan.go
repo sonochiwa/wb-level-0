@@ -1,6 +1,7 @@
 package stan
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -9,12 +10,13 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-redis/cache/v9"
 	"github.com/nats-io/nats.go"
 	"github.com/nats-io/stan.go"
-	"github.com/nats-io/stan.go/pb"
 	config "github.com/sonochiwa/wb-level-0/configs"
 	mc "github.com/sonochiwa/wb-level-0/internal/memcache"
 	"github.com/sonochiwa/wb-level-0/internal/models"
+	"github.com/sonochiwa/wb-level-0/internal/repository"
 )
 
 var cfg = config.GetConfig()
@@ -25,25 +27,17 @@ func messageHandler(msg *stan.Msg) {
 	err := saveToDB(data)
 	if err != nil {
 		log.Printf("Error processing data: %v", err)
+		return
 	}
 
-	//err = saveToMemCache()
-	//if err != nil {
-	//	log.Printf(err)
-	//}
-}
-
-func saveToMemCache(data string) (interface{}, bool) {
-	cache := mc.New(5*time.Minute, 10*time.Minute)
-	cache.Set("myKey", "My value", 5*time.Minute)
-	i, found := cache.Get("myKey")
-	if !found {
-		return nil, found
+	err = saveToCache(data)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
-	return i, false
 }
 
-func saveToDB(data string) error {
+func saveToCache(data string) error {
 	order := models.Order{}
 
 	err := json.Unmarshal([]byte(data), &order)
@@ -51,7 +45,29 @@ func saveToDB(data string) error {
 		return err
 	}
 
-	//repository.NewRepository().CreateOrder(order)
+	if err := mc.MC.Set(&cache.Item{
+		Ctx: context.TODO(), Key: order.OrderUID, Value: data, TTL: time.Hour}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// TODO: unification repo interface
+func saveToDB(data string) error {
+	order := models.Order{}
+	p := &repository.Postgres{DB: repository.DB}
+
+	err := json.Unmarshal([]byte(data), &order)
+
+	if err != nil {
+		return err
+	}
+
+	err = p.CreateOrder(order)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -84,8 +100,7 @@ func New(clusterID, clientID, natsURL string) (stan.Conn, error) {
 }
 
 func Subscribe(sc stan.Conn) {
-	subscription, err := sc.Subscribe(cfg.Stan.ChannelName, messageHandler, stan.StartAt(pb.StartPosition_First),
-		stan.DeliverAllAvailable())
+	subscription, err := sc.Subscribe(cfg.Stan.ChannelName, messageHandler)
 	if err != nil {
 		log.Fatalf("Error subscribing to channel: %v", err)
 	}

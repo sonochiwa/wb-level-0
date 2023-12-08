@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE orders
 (
-    order_uid          UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    order_uid          UUID PRIMARY KEY,
     track_number       VARCHAR(255) UNIQUE,
     entry              VARCHAR(255),
     delivery           JSONB,

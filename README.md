@@ -24,7 +24,7 @@ make run
 
 ## Apache Benchmark
 
-- Get Order By ID - 2551 RPS   
+- Get Order By ID ~ 6700 RPS   
   NOTICE: replace order_uid in URL on your.
 
 ```bash
@@ -33,7 +33,7 @@ make run
 
 ![RPS GET](examples/rps-get-orders.png)
 
-- Create Order - 1854 RPS
+- Create Order ~ 6k RPS
 
 ```bash
 ab -m POST -T application/json -c 10 -n 5000 http://0.0.0.0:8080/orders

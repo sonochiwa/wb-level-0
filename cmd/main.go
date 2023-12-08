@@ -21,21 +21,13 @@ var cfg = configs.GetConfig()
 
 func main() {
 	log.Println("Starting API server...")
-
-	db, err := repository.NewPostgresDB(configs.Postgres{
-		Username: cfg.Postgres.Username,
-		Password: cfg.Postgres.Password,
-		Host:     cfg.Postgres.Host,
-		Port:     cfg.Postgres.Port,
-		DBName:   cfg.Postgres.DBName,
-		SSLMode:  cfg.Postgres.SSLMode,
-	})
+	db, err := repository.GetDB(repository.DB)
 	if err != nil {
 		log.Fatalf("failed to initialize db: %s", err.Error())
 	}
 
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	repos := repository.New(db)
+	services := service.New(repos)
 	handlers := handler.New(services)
 
 	stanConn, err := sc.New(cfg.Stan.ClusterID, cfg.Stan.ClientID, stan.DefaultNatsURL)

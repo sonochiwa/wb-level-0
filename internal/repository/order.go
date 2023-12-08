@@ -9,18 +9,18 @@ import (
 )
 
 type Postgres struct {
-	db *sqlx.DB
+	DB *sqlx.DB
 }
 
 func NewOrderPostgres(db *sqlx.DB) *Postgres {
-	return &Postgres{db: db}
+	return &Postgres{DB: db}
 }
 
 func (p *Postgres) GetAllOrders() ([]models.OrderID, error) {
 	var orders []models.OrderID
 
 	query := selectOrders
-	err := p.db.Select(&orders, query)
+	err := p.DB.Select(&orders, query)
 
 	return orders, err
 }
@@ -29,12 +29,12 @@ func (p *Postgres) GetOrderById(orderID string) (models.Order, error) {
 	var order models.Order
 
 	query := selectOrderByID
-	err := p.db.Get(&order, query, orderID)
+	err := p.DB.Get(&order, query, orderID)
 
 	return order, err
 }
 
-func (p *Postgres) CreateOrder(order models.Order) (string, error) {
+func (p *Postgres) CreateOrder(order models.Order) error {
 	query := insertOrder
 
 	delivery, err := json.Marshal(&order.Delivery)
@@ -52,17 +52,17 @@ func (p *Postgres) CreateOrder(order models.Order) (string, error) {
 		log.Fatal(err)
 	}
 
-	err = p.db.QueryRow(query,
-		order.TrackNumber, order.Entry, delivery, payment, items, order.Locale, order.InternalSignature,
+	err = p.DB.QueryRow(query,
+		order.OrderUID, order.TrackNumber, order.Entry, delivery, payment, items, order.Locale, order.InternalSignature,
 		order.CustomerID, order.DeliveryService, order.ShardKey, order.SmID, order.DateCreated, order.OofShard,
 	).Scan(&order.OrderUID)
 
-	return order.OrderUID, err
+	return err
 }
 
 func (p *Postgres) DeleteAllOrders() error {
 	query := deleteAllOrders
-	_, err := p.db.Exec(query)
+	_, err := p.DB.Exec(query)
 	if err != nil {
 		return err
 	}

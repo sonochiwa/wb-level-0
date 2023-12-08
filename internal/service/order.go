@@ -1,11 +1,14 @@
 package service
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 
 	gf "github.com/brianvoe/gofakeit/v6"
 	"github.com/sonochiwa/wb-level-0/internal/clients/stan"
+	mc "github.com/sonochiwa/wb-level-0/internal/memcache"
 	"github.com/sonochiwa/wb-level-0/internal/models"
 	"github.com/sonochiwa/wb-level-0/internal/repository"
 )
@@ -23,7 +26,16 @@ func (s *OrderService) GetAllOrders() ([]models.OrderID, error) {
 }
 
 func (s *OrderService) GetOrderById(orderID string) (models.Order, error) {
-	return s.repo.GetOrderById(orderID)
+	var wanted string
+	var jsonWander models.Order
+	mc.MC.Get(context.TODO(), orderID, &wanted)
+
+	err := json.Unmarshal([]byte(wanted), &jsonWander)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return jsonWander, nil
 }
 
 func (s *OrderService) CreateOrder() error {
@@ -45,6 +57,7 @@ func (s *OrderService) CreateOrder() error {
 		}
 	}
 	order := &models.Order{
+		OrderUID:    gf.UUID(),
 		TrackNumber: trackNumber,
 		Entry:       gf.Word(),
 		Delivery: models.Delivery{
@@ -84,10 +97,13 @@ func (s *OrderService) CreateOrder() error {
 		return err
 	}
 
+	// TODO: validate data before public to channel
 	err = stan.PublishMessage(message)
 	if err != nil {
 		return err
 	}
+
+	//s.repo.CreateOrder(*order)
 
 	return nil
 }
