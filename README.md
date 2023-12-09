@@ -1,6 +1,9 @@
 ## Prerequisites
 
-Installed Docker Compose
+Installed:
+
+- Docker Compose
+- Go >= 1.18
 
 ## First installation
 
